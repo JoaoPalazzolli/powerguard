@@ -1,0 +1,13 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: powerguard-service
+  data:
+    mongodb:
+      authentication-database: admin
+      username: root
+      password: admin
+      database: powerguard-db
+      port: 27017
+      host: localhost
