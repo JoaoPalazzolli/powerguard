@@ -45,7 +45,6 @@ public class EnergyService {
                                 .set(CACHE_KEY, energyList))
                 .subscribe(result -> log.info("Energy data updated and cached successfully"),
                         error -> log.error("Error during energy data update", error));
-        ;
     }
 
     private Mono<Void> updateEnergyInDB() {
