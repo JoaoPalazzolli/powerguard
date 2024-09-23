@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: powerguard-service
+  config:
+    import: optional:file:.env[.properties]
   data:
     mongodb:
       authentication-database: admin
@@ -11,3 +13,10 @@ spring:
       database: powerguard-db
       port: 27017
       host: localhost
+  cache:
+    type: redis
+  redis:
+    host: localhost
+    port: 6379
+security:
+  cache_key: ${CACHE_KEY}
