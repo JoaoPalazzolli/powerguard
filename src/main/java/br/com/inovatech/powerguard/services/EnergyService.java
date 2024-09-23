@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -50,13 +51,21 @@ public class EnergyService {
     private Mono<Void> updateEnergyInDB() {
         log.info("Updating Energy data in Database");
 
-        return api.getByHour()
-                .flatMap(apiEnergy ->
-                        energyRepository.save(Mapper.parseObject(apiEnergy, Energy.class))
-                                .doOnNext(savedEnergy ->
-                                        log.info("Saved new or updated energy data with ID: {}", savedEnergy.getId())
-                                )
-                ).doFinally(x -> Mapper.parseObject(x, EnergyDTO.class))
-                .then();
+        return energyRepository.findAll()
+                .collectList()
+                .flatMap(dbEnergy ->
+                        api.getByHour().filter(apiEnergy ->
+                                        dbEnergy.stream().noneMatch(x ->
+                                                apiEnergy.getId().equals(x.getId()))).collectList()
+                                .flatMapMany(energyList ->
+                                        Flux.fromIterable(energyList)
+                                                .flatMap(newEnergy ->
+                                                        energyRepository.save(Mapper.parseObject(newEnergy, Energy.class))
+                                                                .doOnSuccess(savedEnergy ->
+                                                                        log.info("Saved new energy data with ID: {}", savedEnergy.getId())
+                                                                )
+                                                ).doFinally(x -> Mapper.parseObject(x, EnergyDTO.class))
+                                ).then());
+
     }
 }
