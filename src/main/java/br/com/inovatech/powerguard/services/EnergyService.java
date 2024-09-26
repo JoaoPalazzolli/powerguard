@@ -32,10 +32,6 @@ public class EnergyService {
     @Value("${security.cache_key}")
     private String CACHE_KEY;
 
-    public EnergyService(List<EnergyMonitoringAPI> energyMonitoringAPI) {
-        this.energyMonitoringAPI = energyMonitoringAPI;
-    }
-
     public Mono<Object> findAll() {
         return redisTemplate.opsForValue().get(CACHE_KEY);
     }
