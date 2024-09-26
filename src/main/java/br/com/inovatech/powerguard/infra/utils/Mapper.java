@@ -1,4 +1,4 @@
-package br.com.inovatech.powerguard.utils;
+package br.com.inovatech.powerguard.infra.utils;
 
 import org.modelmapper.ModelMapper;
 
