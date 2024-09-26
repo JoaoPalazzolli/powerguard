@@ -15,7 +15,7 @@ public class EnergyController {
     private EnergyService energyService;
 
     @GetMapping
-    public Mono<Object> findAllByHour() {
-        return energyService.findAllByHour();
+    public Mono<Object> findAll() {
+        return energyService.findAll();
     }
 }
