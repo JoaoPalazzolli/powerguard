@@ -1,4 +1,4 @@
-package br.com.inovatech.powerguard.configs;
+package br.com.inovatech.powerguard.infra.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
