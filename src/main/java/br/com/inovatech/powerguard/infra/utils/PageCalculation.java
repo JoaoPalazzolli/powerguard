@@ -7,8 +7,8 @@ public class PageCalculation {
 
         if(count == null || count < 0) return  null;
 
-        if(count % 10 != 0) return (int) ((count / 10) + 1);
+        if(count % 10 != 0) return (count / 10) + 1;
 
-        return (int) (count / 10);
+        return count / 10;
     }
 }
