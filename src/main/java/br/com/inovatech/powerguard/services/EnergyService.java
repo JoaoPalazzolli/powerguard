@@ -40,8 +40,8 @@ public class EnergyService {
     private void refreshEnergyData() {
         log.info("Refreshing Energy Data");
 
-            energyMonitoringAPI.forEach(x -> {
-                updateEnergyInDB(x)
+            energyMonitoringAPI.forEach(building -> {
+                updateEnergyInDB(building)
                         .thenMany(energyRepository.findAll().map(energy -> Mapper.parseObject(energy, EnergyDTO.class)))
                         .collectList()
                         .flatMapMany(energyList ->
@@ -51,26 +51,23 @@ public class EnergyService {
                                 error -> log.error("Error during energy data update", error));
             });
 
-
-
-
     }
 
-    private Mono<Void> updateEnergyInDB(EnergyMonitoringAPI api) {
+    private Mono<Void> updateEnergyInDB(EnergyMonitoringAPI building) {
         log.info("Updating Energy data in Database");
 
         return energyRepository.findAll()
                 .collectList()
                 .flatMap(dbEnergy ->
-                        api.getEnergyData().filter(apiEnergy ->
-                                        dbEnergy.stream().noneMatch(x ->
-                                                apiEnergy.getId().equals(x.getId()))).collectList()
-                                .flatMapMany(energyList ->
-                                        Flux.fromIterable(energyList)
+                        building.getEnergyData().filter(buildingEnergy ->
+                                        dbEnergy.stream().noneMatch(db ->
+                                                buildingEnergy.getId().equals(db.getId()))).collectList()
+                                .flatMapMany(newEnergiesData ->
+                                        Flux.fromIterable(newEnergiesData)
                                                 .flatMap(newEnergy ->
                                                         energyRepository.save(Mapper.parseObject(newEnergy, Energy.class))
                                                                 .doOnSuccess(savedEnergy ->
-                                                                        log.info("Saved new energy data with ID: {} in building: {}", savedEnergy.getId(), api.getBuildingName())
+                                                                        log.info("Saved new energy data with ID: {} in building: {}", savedEnergy.getId(), building.getBuildingName())
                                                                 )
                                                 ).doFinally(x -> Mapper.parseObject(x, EnergyDTO.class))
                                 ).then());
