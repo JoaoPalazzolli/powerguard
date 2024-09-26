@@ -20,3 +20,12 @@ spring:
     port: 6379
 security:
   cache_key: ${CACHE_KEY}
+external:
+  api:
+    host: ${API_HOST}
+    port: ${API_PORT}
+    schema: ${API_SCHEMA}
+    endpoints:
+      building_a: ${API_ENDPOINT_BUILDING_A}
+      building_c: ${API_ENDPOINT_BUILDING_C}
+      building_l: ${API_ENDPOINT_BUILDING_L}
