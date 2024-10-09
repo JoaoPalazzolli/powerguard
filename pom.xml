@@ -30,6 +30,9 @@
         <java.version>17</java.version>
         <modelmapper.version>3.2.1</modelmapper.version>
         <redis.version>3.3.4</redis.version>
+        <java-jwt.version>4.4.0</java-jwt.version>
+        <jjwt.version>0.11.5</jjwt.version>
+        <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
     </properties>
     <dependencies>
         <dependency>
@@ -40,6 +43,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
         <dependency>
@@ -59,6 +67,35 @@
             <version>${modelmapper.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${java-jwt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta-servlet.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
