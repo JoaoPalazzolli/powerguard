@@ -1,6 +1,7 @@
 package br.com.inovatech.powerguard.infra.external.proxy;
 
 import br.com.inovatech.powerguard.dtos.EnergyDTO;
+import br.com.inovatech.powerguard.infra.utils.BuildingType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ public class MonitoringBuildingA implements EnergyMonitoringAPI{
 
     @Override
     public String getBuildingName() {
-        return "Building A";
+        return BuildingType.Building_A.name();
     }
 
 }
