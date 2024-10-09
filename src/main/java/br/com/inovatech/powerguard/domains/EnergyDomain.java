@@ -16,14 +16,15 @@ import java.util.Date;
 @Data
 @Builder
 @Document(collection = "energy")
-public class Energy implements Serializable {
+public class EnergyDomain implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
-    private Integer id;
+    private String id;
 
+    private String building;
     private Date timestamp;
     private Double tensaoa;
     private Double tensaob;
