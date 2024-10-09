@@ -2,7 +2,6 @@ package br.com.inovatech.powerguard.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,14 +12,14 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Builder
 public class EnergyDTO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Integer id;
+    private String id;
 
+    private String building;
     private Date timestamp;
     private Double tensaoa;
     private Double tensaob;
