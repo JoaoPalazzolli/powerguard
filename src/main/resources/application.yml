@@ -15,11 +15,11 @@ spring:
       database: ${DB}
       port: ${PORT_DB}
       host: ${HOST_DB}
-  cache:
-    type: redis
-  redis:
-    host: ${HOST_CACHE}
-    port: ${PORT_CACHE}
+    cache:
+      type: redis
+    redis:
+      host: ${HOST_CACHE}
+      port: ${PORT_CACHE}
 security:
   key: ${SECURITY_KEY}
   token_expiration_time: ${TOKEN_EXPIRATION_TIME}
