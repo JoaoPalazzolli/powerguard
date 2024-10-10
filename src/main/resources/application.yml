@@ -1,0 +1,46 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: powerguard-service
+  config:
+    import: optional:file:.env[.properties]
+  main:
+    allow-bean-definition-overriding: true
+  data:
+    mongodb:
+      authentication-database: admin
+      username: root
+      password: admin
+      database: powerguard-db
+      port: 27017
+      host: localhost
+  cache:
+    type: redis
+  redis:
+    host: localhost
+    port: 6379
+security:
+  key: ${SECURITY_KEY}
+  token_expiration_time: ${TOKEN_EXPIRATION_TIME}
+  cache-key:
+    cache-key-a: ${CACHE_KEY_A}
+    cache-key-c: ${CACHE_KEY_C}
+    cache-key-l: ${CACHE_KEY_L}
+  authentication:
+    username-a: ${USERNAME_A}
+    password-a: ${PASSWORD_A}
+    username-c: ${USERNAME_C}
+    password-c: ${PASSWORD_C}
+    username-l: ${USERNAME_L}
+    password-l: ${PASSWORD_L}
+
+external:
+  api:
+    host: ${API_HOST}
+    port: ${API_PORT}
+    schema: ${API_SCHEMA}
+    endpoints:
+      building_a: ${API_ENDPOINT_BUILDING_A}
+      building_c: ${API_ENDPOINT_BUILDING_C}
+      building_l: ${API_ENDPOINT_BUILDING_L}
