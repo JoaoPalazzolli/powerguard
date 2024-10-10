@@ -27,6 +27,7 @@ services:
         condition: service_healthy
     image: mongo-express:latest
     restart: always
+    profiles: [ "dev" ]
     ports:
       - "80:8081"
     environment:
@@ -38,13 +39,39 @@ services:
       - powerguard-net
 
   redis:
+    container_name: powerguard-cache
+    healthcheck:
+      test: [ "CMD", "redis-cli", "PING" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
     image: redis:latest
-    container_name: redis
     restart: always
     volumes:
       - redis-data:/data
     ports:
       - "6379:6379"
+    networks:
+      - powerguard-net
+
+  api:
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    container_name: powerguard-api
+    image: joaopalazzolli/powerguard
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: [ "prod" ]
+    ports:
+      - "80:8080"
+    volumes:
+      - .:/usr/src/powerguard
+    networks:
+      - powerguard-net
 
 volumes:
   mongo-data:

@@ -10,16 +10,16 @@ spring:
   data:
     mongodb:
       authentication-database: admin
-      username: root
-      password: admin
-      database: powerguard-db
-      port: 27017
-      host: localhost
-  cache:
-    type: redis
-  redis:
-    host: localhost
-    port: 6379
+      username: ${USERNAME_DB}
+      password: ${PASSWORD_DB}
+      database: ${DB}
+      port: ${PORT_DB}
+      host: ${HOST_DB}
+    cache:
+      type: redis
+    redis:
+      host: ${HOST_CACHE}
+      port: ${PORT_CACHE}
 security:
   key: ${SECURITY_KEY}
   token_expiration_time: ${TOKEN_EXPIRATION_TIME}

@@ -9,6 +9,7 @@ import br.com.inovatech.powerguard.infra.security.roles.UserRoles;
 import br.com.inovatech.powerguard.infra.security.utils.JwtUtils;
 import br.com.inovatech.powerguard.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,6 +26,7 @@ import reactor.core.publisher.Mono;
  * Utiliza ReactiveAuthenticationManager para realizar a autenticação
  * reativa e JWT para gerar tokens de acesso.
  */
+@Slf4j
 @Service
 public class AuthService {
 
@@ -54,6 +56,7 @@ public class AuthService {
      * @return Mono<ResponseEntity<TokenDTO>> que contém o token JWT de autenticação.
      */
     public Mono<ResponseEntity<TokenDTO>> signin(SigninDTO signinDTO) {
+        log.info("Efetuando Login");
         return userRepository.findByUsername(signinDTO.getUsername())
                 .switchIfEmpty(Mono.error(new BadCredentialsException("invalid username or password!!!")))
                 .flatMap(user -> reactiveAuthenticationManager
