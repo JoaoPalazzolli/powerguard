@@ -50,6 +50,7 @@ public class EnergyService {
      */
     @SuppressWarnings("unchecked")
     public Mono<ResponseEntity<List<EnergyDTO>>> findAll() {
+        log.info("Buscando dados de energia");
         return AuthenticatedUserUtils.getUser()
                 .flatMap(user -> redisTemplate.opsForValue().get(user.getKeyRequest()))
                 .map(result -> {
