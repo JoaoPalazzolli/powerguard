@@ -39,8 +39,13 @@ services:
       - powerguard-net
 
   redis:
-    image: redis:latest
     container_name: powerguard-cache
+    healthcheck:
+      test: [ "CMD", "redis-cli", "PING" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    image: redis:latest
     restart: always
     volumes:
       - redis-data:/data
@@ -50,6 +55,11 @@ services:
       - powerguard-net
 
   api:
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     container_name: powerguard-api
     image: joaopalazzolli/powerguard
     build:
