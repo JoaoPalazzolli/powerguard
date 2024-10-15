@@ -62,10 +62,32 @@ services:
         condition: service_healthy
     container_name: powerguard-api
     image: joaopalazzolli/powerguard
-    build:
-      context: .
-      dockerfile: Dockerfile
     profiles: [ "prod" ]
+    environment:
+      - CACHE_KEY_A=${CACHE_KEY_A}
+      - CACHE_KEY_C=${CACHE_KEY_C}
+      - CACHE_KEY_L=${CACHE_KEY_L}
+      - API_HOST=${API_HOST}
+      - API_PORT=${API_PORT}
+      - API_SCHEMA=${API_SCHEMA}
+      - API_ENDPOINT_BUILDING_A=${API_ENDPOINT_BUILDING_A}
+      - API_ENDPOINT_BUILDING_C=${API_ENDPOINT_BUILDING_C}
+      - API_ENDPOINT_BUILDING_L=${API_ENDPOINT_BUILDING_L}
+      - SECURITY_KEY=${SECURITY_KEY}
+      - TOKEN_EXPIRATION_TIME=${TOKEN_EXPIRATION_TIME}
+      - USERNAME_A=${USERNAME_A}
+      - PASSWORD_A=${PASSWORD_A}
+      - USERNAME_C=${USERNAME_C}
+      - PASSWORD_C=${PASSWORD_C}
+      - USERNAME_L=${USERNAME_L}
+      - PASSWORD_L=${PASSWORD_L}
+      - DB=${DB}
+      - HOST_DB=${HOST_DB}
+      - PORT_DB=${PORT_DB}
+      - USERNAME_DB=${USERNAME_DB}
+      - PASSWORD_DB=${PASSWORD_DB}
+      - HOST_CACHE=${HOST_CACHE}
+      - PORT_CACHE=${PORT_CACHE}
     ports:
       - "80:8080"
     volumes:
