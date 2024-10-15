@@ -1,10 +1,10 @@
 server:
   port: 8080
 spring:
+  profiles:
+    active: @profileActive@
   application:
     name: powerguard-service
-  config:
-    import: optional:file:.env[.properties]
   main:
     allow-bean-definition-overriding: true
   data:
@@ -34,7 +34,6 @@ security:
     password-c: ${PASSWORD_C}
     username-l: ${USERNAME_L}
     password-l: ${PASSWORD_L}
-
 external:
   api:
     host: ${API_HOST}
@@ -44,3 +43,11 @@ external:
       building_a: ${API_ENDPOINT_BUILDING_A}
       building_c: ${API_ENDPOINT_BUILDING_C}
       building_l: ${API_ENDPOINT_BUILDING_L}
+
+# DEV
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+    import: optional:file:.env[.properties]
