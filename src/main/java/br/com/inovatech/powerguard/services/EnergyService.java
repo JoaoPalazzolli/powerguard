@@ -11,6 +11,7 @@ import br.com.inovatech.powerguard.repositories.EnergyRepository;
 import br.com.inovatech.powerguard.infra.utils.Mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -42,6 +43,9 @@ public class EnergyService {
     @Autowired
     private CacheEnvironmentConfig cacheKeys;
 
+    @Value("${security.cache-key.key-all}")
+    private String cacheKeyAll;
+
     /**
      * Recupera todos os dados de energia do cache do Redis para o usuário autenticado.
      *
@@ -50,7 +54,7 @@ public class EnergyService {
      */
     @SuppressWarnings("unchecked")
     public Mono<ResponseEntity<List<EnergyDTO>>> findAll() {
-        log.info("Buscando dados de energia");
+        log.info("Finding the last building energy data");
         return AuthenticatedUserUtils.getUser()
                 .flatMap(user -> redisTemplate.opsForValue().get(user.getKeyRequest()))
                 .map(result -> {
@@ -61,14 +65,29 @@ public class EnergyService {
     }
 
     /**
+     * Recupera o histórico de dados de energia do cache do Redis.
+     *
+     * @return Mono<ResponseEntity<List<EnergyDTO>>> contendo a lista de dados de energia do histórico
+     *         ou uma resposta sem conteúdo caso o cache esteja vazio.
+     */
+    @SuppressWarnings("unchecked")
+    public Mono<ResponseEntity<List<EnergyDTO>>> findAllHistory() {
+        log.info("Finding all energy data history");
+        return redisTemplate.opsForValue().get(cacheKeyAll)
+                .map(data -> ResponseEntity.ok((List<EnergyDTO>) data))
+                .defaultIfEmpty(ResponseEntity.noContent().build());
+    }
+
+    /**
      * Método agendado para atualizar os dados de energia no banco de dados e no cache Redis
      * a cada 5 minutos (300000 ms). Para cada prédio monitorado, o serviço atualiza os dados no banco
      * de dados e armazena os novos dados no cache correspondente.
      */
     @Scheduled(fixedRate = 300000)
     private void refreshEnergyData() {
-        log.info("Refreshing Energy Data");
+        log.warn("Refreshing Energy Data");
 
+        log.warn("Updating Energy data in Database");
         energyMonitoringAPI.forEach(building -> {
             updateEnergyInDB(building)
                     .thenMany(findAllByBuilding(building.getBuildingName()))
@@ -91,6 +110,21 @@ public class EnergyService {
                     })
                     .subscribe();
         });
+
+        updateEnergyHistoryInCache();
+    }
+
+    /**
+     * Atualiza o histórico de dados de energia no cache Redis.
+     */
+    private void updateEnergyHistoryInCache() {
+        log.warn("Updating energy data history in the cache");
+
+        energyRepository.findAll()
+                .collectList()
+                .flatMap(energies -> redisTemplate.opsForValue().set(cacheKeyAll, energies))
+                .doOnSuccess(success -> log.warn("Energy data history updated in the cache"))
+                .subscribe();
     }
 
     /**
@@ -112,8 +146,6 @@ public class EnergyService {
      * @return Mono<Void> indicando a conclusão da operação de atualização.
      */
     private Mono<Void> updateEnergyInDB(EnergyMonitoringAPI building) {
-        log.info("Updating Energy data in Database");
-
         return energyRepository.findAll()
                 .collectList()
                 .flatMap(dbEnergy ->
@@ -133,7 +165,7 @@ public class EnergyService {
                                                 .flatMap(newEnergy ->
                                                         energyRepository.save(Mapper.parseObject(newEnergy, EnergyDomain.class))
                                                                 .doOnSuccess(savedEnergyDomain ->
-                                                                        log.info("Saved new energy data with ID: {} in building: {}",
+                                                                        log.warn("Saved new energy data with ID: {} in building: {}",
                                                                                 savedEnergyDomain.getId(), building.getBuildingName())
                                                                 )
                                                 ).doFinally(x -> Mapper.parseObject(x, EnergyDTO.class))
