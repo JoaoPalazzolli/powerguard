@@ -56,13 +56,17 @@ public class AuthService {
      * @return Mono<ResponseEntity<TokenDTO>> que contém o token JWT de autenticação.
      */
     public Mono<ResponseEntity<TokenDTO>> signin(SigninDTO signinDTO) {
-        log.info("Efetuando Login");
+        log.info("Logging in");
         return userRepository.findByUsername(signinDTO.getUsername())
-                .switchIfEmpty(Mono.error(new BadCredentialsException("invalid username or password!!!")))
+                .switchIfEmpty(Mono.error(new BadCredentialsException("Invalid username or password!")))
                 .flatMap(user -> reactiveAuthenticationManager
                         .authenticate(new UsernamePasswordAuthenticationToken(signinDTO.getUsername(), signinDTO.getPassword()))
                         .thenReturn(jwtUtils.createToken(user)))
-                .map(ResponseEntity::ok);
+                .map(ResponseEntity::ok)
+                .onErrorResume(BadCredentialsException.class, e -> {
+                    log.error("Authentication failed: {}", e.getMessage());
+                    return Mono.error(new BadCredentialsException("Invalid username or password!"));
+                });
     }
 
     /**
