@@ -9,11 +9,11 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class CacheEnvironmentConfig {
 
-    private String cacheKeyA;
-    private String cacheKeyC;
-    private String cacheKeyL;
+    private String keyA;
+    private String keyC;
+    private String keyL;
 
     public String[] getCaches(){
-        return new String[] {cacheKeyA, cacheKeyC, cacheKeyL};
+        return new String[] {keyA, keyC, keyL};
     }
 }
