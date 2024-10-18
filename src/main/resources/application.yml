@@ -24,9 +24,10 @@ security:
   key: ${SECURITY_KEY}
   token_expiration_time: ${TOKEN_EXPIRATION_TIME}
   cache-key:
-    cache-key-a: ${CACHE_KEY_A}
-    cache-key-c: ${CACHE_KEY_C}
-    cache-key-l: ${CACHE_KEY_L}
+    key-a: ${CACHE_KEY_A}
+    key-c: ${CACHE_KEY_C}
+    key-l: ${CACHE_KEY_L}
+    key-all: ${CACHE_KEY_ALL}
   authentication:
     username-a: ${USERNAME_A}
     password-a: ${PASSWORD_A}
