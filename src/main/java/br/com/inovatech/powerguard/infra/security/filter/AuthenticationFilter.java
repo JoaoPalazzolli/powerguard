@@ -1,6 +1,7 @@
 package br.com.inovatech.powerguard.infra.security.filter;
 
 import br.com.inovatech.powerguard.infra.security.utils.JwtUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
  *
  * Esta classe implementa a interface `WebFilter`, integrando a autenticação JWT ao contexto de segurança reativo do Spring.
  */
+@Slf4j
 @Component
 public class AuthenticationFilter implements WebFilter {
 
@@ -64,6 +66,8 @@ public class AuthenticationFilter implements WebFilter {
                                 .flatMap(context -> chain.filter(exchange)
                                         .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext))));
                     }
+
+                    log.error("Authentication error: Invalid or expired JWT token.");
                     return chain.filter(exchange); // Continua se o token não for válido
                 });
     }
