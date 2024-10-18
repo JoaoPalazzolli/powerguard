@@ -43,6 +43,11 @@ external:
       building_a: ${API_ENDPOINT_BUILDING_A}
       building_c: ${API_ENDPOINT_BUILDING_C}
       building_l: ${API_ENDPOINT_BUILDING_L}
+springdoc:
+  pathsToMatch:
+    - /api/**
+  swagger-ui:
+    use-root-path: true
 
 # DEV
 ---
