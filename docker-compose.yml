@@ -62,11 +62,15 @@ services:
         condition: service_healthy
     container_name: powerguard-api
     image: joaopalazzolli/powerguard
+    build:
+      context: .
+      dockerfile: Dockerfile
     profiles: [ "prod" ]
     environment:
       - CACHE_KEY_A=${CACHE_KEY_A}
       - CACHE_KEY_C=${CACHE_KEY_C}
       - CACHE_KEY_L=${CACHE_KEY_L}
+      - CACHE_KEY_ALL=${CACHE_KEY_ALL}
       - API_HOST=${API_HOST}
       - API_PORT=${API_PORT}
       - API_SCHEMA=${API_SCHEMA}
