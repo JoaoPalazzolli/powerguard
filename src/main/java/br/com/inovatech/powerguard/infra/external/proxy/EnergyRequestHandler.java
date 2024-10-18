@@ -1,12 +1,14 @@
 package br.com.inovatech.powerguard.infra.external.proxy;
 
 import br.com.inovatech.powerguard.dtos.EnergyDTO;
+import br.com.inovatech.powerguard.infra.exceptions.ExternalApiRequestException;
 import br.com.inovatech.powerguard.infra.external.dto.ApiResponseDTO;
 import br.com.inovatech.powerguard.infra.utils.PageCalculation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -77,6 +79,7 @@ public class EnergyRequestHandler {
                     return uri.build();
                 })
                 .retrieve()
-                .bodyToMono(ApiResponseDTO.class);
+                .bodyToMono(ApiResponseDTO.class)
+                .onErrorMap(WebClientResponseException.class, e -> new ExternalApiRequestException("Failed to connect to the external API"));
     }
 }
