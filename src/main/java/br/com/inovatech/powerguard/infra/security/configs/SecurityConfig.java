@@ -39,8 +39,9 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/api/v1/auth/**").permitAll() // Endpoints de autenticação acessíveis sem login
-                        .pathMatchers("/api/v1/energy/**").authenticated() // Endpoints de energia exigem autenticação
+                        .pathMatchers("/api/v1/auth/**", "/webjars/**", "/v3/api-docs/**").permitAll()
+                        .pathMatchers("/api/v1/energy/**").authenticated()
+                        .pathMatchers("/users").denyAll()
                 )
                 .authenticationManager(reactiveAuthenticationManager) // Gerenciador de autenticação reativo
                 .addFilterAt(authFilter, SecurityWebFiltersOrder.AUTHENTICATION) // Adiciona o filtro de autenticação personalizado
