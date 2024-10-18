@@ -33,6 +33,7 @@
         <java-jwt.version>4.4.0</java-jwt.version>
         <jjwt.version>0.11.5</jjwt.version>
         <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
+        <open-api.version>2.6.0</open-api.version>
     </properties>
     <dependencies>
         <dependency>
@@ -65,6 +66,12 @@
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
             <version>${modelmapper.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+            <version>${open-api.version}</version>
         </dependency>
 
         <dependency>
@@ -130,6 +137,13 @@
             </plugin>
         </plugins>
     </build>
+    <repositories>
+        <repository>
+            <id>maven_central</id>
+            <name>Maven Central</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
+    </repositories>
 
     <profiles>
         <profile>
