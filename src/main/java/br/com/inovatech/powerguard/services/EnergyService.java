@@ -3,6 +3,7 @@ package br.com.inovatech.powerguard.services;
 import br.com.inovatech.powerguard.domains.EnergyDomain;
 import br.com.inovatech.powerguard.dtos.EnergyDTO;
 import br.com.inovatech.powerguard.infra.configs.CacheEnvironmentConfig;
+import br.com.inovatech.powerguard.infra.exceptions.EnergyNotFoundException;
 import br.com.inovatech.powerguard.infra.external.proxy.EnergyMonitoringAPI;
 import br.com.inovatech.powerguard.infra.security.utils.AuthenticatedUserUtils;
 import br.com.inovatech.powerguard.infra.security.utils.PageUtils;
@@ -89,7 +90,8 @@ public class EnergyService {
     public Mono<ResponseEntity<EnergyDTO>> findById(String id) {
         log.info("Finding energy data by id");
         return energyRepository.findById(id)
-                .map(energy -> ResponseEntity.ok(Mapper.parseObject(energy, EnergyDTO.class)));
+                .map(energy -> ResponseEntity.ok(Mapper.parseObject(energy, EnergyDTO.class)))
+                .switchIfEmpty(Mono.error(new EnergyNotFoundException("Energy data not found")));
     }
 
     /**
