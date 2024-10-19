@@ -1,5 +1,6 @@
 package br.com.inovatech.powerguard.infra.exceptions.handler;
 
+import br.com.inovatech.powerguard.infra.exceptions.EnergyNotFoundException;
 import br.com.inovatech.powerguard.infra.exceptions.ExceptionsResponse;
 import br.com.inovatech.powerguard.infra.exceptions.ExternalApiRequestException;
 import org.springframework.http.HttpStatus;
@@ -50,5 +51,17 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
                 .build();
 
         return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionsResponse));
+    }
+
+    @ExceptionHandler(EnergyNotFoundException.class)
+    public Mono<ResponseEntity<ExceptionsResponse>> handleEnergyNotFoundException(Exception ex, ServerWebExchange exchange) {
+
+        var exceptionsResponse = ExceptionsResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .message(ex.getMessage())
+                .details(exchange.getRequest().getURI().toString())
+                .build();
+
+        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionsResponse));
     }
 }
