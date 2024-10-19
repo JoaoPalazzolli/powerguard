@@ -5,13 +5,13 @@ import br.com.inovatech.powerguard.dtos.EnergyDTO;
 import br.com.inovatech.powerguard.infra.configs.CacheEnvironmentConfig;
 import br.com.inovatech.powerguard.infra.external.proxy.EnergyMonitoringAPI;
 import br.com.inovatech.powerguard.infra.security.utils.AuthenticatedUserUtils;
+import br.com.inovatech.powerguard.infra.security.utils.PageUtils;
 import br.com.inovatech.powerguard.infra.utils.BuildingType;
 import br.com.inovatech.powerguard.infra.utils.StringUtil;
 import br.com.inovatech.powerguard.repositories.EnergyRepository;
 import br.com.inovatech.powerguard.infra.utils.Mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,7 +19,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
+
 
 /**
  * Service responsável por gerenciar dados de energia, incluindo atualização,
@@ -43,18 +45,14 @@ public class EnergyService {
     @Autowired
     private CacheEnvironmentConfig cacheKeys;
 
-    @Value("${security.cache-key.key-all}")
-    private String cacheKeyAll;
-
     /**
-     * Recupera todos os dados de energia do cache do Redis para o usuário autenticado.
+     * Recupera todos os dados de energia das 24 horas de um prédio para o usuário autenticado.
      *
      * @return Mono<ResponseEntity<List<EnergyDTO>>> contendo a lista de dados de energia
      *         ou uma resposta sem conteúdo caso o cache esteja vazio.
      */
-    @SuppressWarnings("unchecked")
-    public Mono<ResponseEntity<List<EnergyDTO>>> findAll() {
-        log.info("Finding the last building energy data");
+    public Mono<ResponseEntity<List<EnergyDTO>>> findEnergyDataLast24Hours() {
+        log.info("Finding all energy data from the last 24 hours");
         return AuthenticatedUserUtils.getUser()
                 .flatMap(user -> redisTemplate.opsForValue().get(user.getKeyRequest()))
                 .map(result -> {
@@ -65,17 +63,33 @@ public class EnergyService {
     }
 
     /**
-     * Recupera o histórico de dados de energia do cache do Redis.
+     * Recupera todo o histórico de dados de energia para o usuário autenticado.
      *
-     * @return Mono<ResponseEntity<List<EnergyDTO>>> contendo a lista de dados de energia do histórico
-     *         ou uma resposta sem conteúdo caso o cache esteja vazio.
+     * @param page     Número da página a ser recuperada.
+     * @param size     Tamanho da página.
+     * @param direction Direção da ordenação (ASC ou DESC).
+     * @param orderBy  Campo pelo qual os dados devem ser ordenados.
+     * @return Mono<ResponseEntity<List<EnergyDTO>>> contendo a lista de dados de energia
+     *         ou uma resposta sem conteúdo caso não haja dados.
      */
-    @SuppressWarnings("unchecked")
-    public Mono<ResponseEntity<List<EnergyDTO>>> findAllHistory() {
+    public Mono<ResponseEntity<List<EnergyDTO>>> findAllEnergyDataHistory(int page, int size, String direction, String orderBy) {
         log.info("Finding all energy data history");
-        return redisTemplate.opsForValue().get(cacheKeyAll)
-                .map(data -> ResponseEntity.ok((List<EnergyDTO>) data))
+        return energyRepository.findAll(PageUtils.pageable(page, size, direction, orderBy))
+                .collectList()
+                .map(energies -> ResponseEntity.ok(Mapper.parseListObject(energies, EnergyDTO.class)))
                 .defaultIfEmpty(ResponseEntity.noContent().build());
+    }
+
+    /**
+     * Recupera os dados de energia por ID.
+     *
+     * @param id ID do dado de energia a ser recuperado.
+     * @return Mono<ResponseEntity<EnergyDTO>> contendo os dados de energia ou uma resposta sem conteúdo.
+     */
+    public Mono<ResponseEntity<EnergyDTO>> findById(String id) {
+        log.info("Finding energy data by id");
+        return energyRepository.findById(id)
+                .map(energy -> ResponseEntity.ok(Mapper.parseObject(energy, EnergyDTO.class)));
     }
 
     /**
@@ -110,31 +124,18 @@ public class EnergyService {
                     })
                     .subscribe();
         });
-
-        updateEnergyHistoryInCache();
     }
 
     /**
-     * Atualiza o histórico de dados de energia no cache Redis.
-     */
-    private void updateEnergyHistoryInCache() {
-        log.warn("Updating energy data history in the cache");
-
-        energyRepository.findAll()
-                .collectList()
-                .flatMap(energies -> redisTemplate.opsForValue().set(cacheKeyAll, energies))
-                .doOnSuccess(success -> log.warn("Energy data history updated in the cache"))
-                .subscribe();
-    }
-
-    /**
-     * Recupera todos os dados de energia de um prédio específico.
+     * Recupera todos os dados de energia de um prédio específico no dia atual.
      *
      * @param building Nome do prédio para o qual os dados de energia devem ser recuperados.
      * @return Flux<EnergyDTO> contendo os dados de energia correspondentes ao prédio.
      */
     private Flux<EnergyDTO> findAllByBuilding(String building) {
-        return energyRepository.findByBuilding(building)
+        var startOfDay = LocalDate.now().atStartOfDay();
+        var endOfDay = startOfDay.plusDays(1);
+        return energyRepository.findByBuildingAndToday(building, startOfDay, endOfDay)
                 .map(energyDomain -> Mapper.parseObject(energyDomain, EnergyDTO.class));
     }
 
@@ -171,4 +172,6 @@ public class EnergyService {
                                                 ).doFinally(x -> Mapper.parseObject(x, EnergyDTO.class))
                                 ).then());
     }
+
+
 }
