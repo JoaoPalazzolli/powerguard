@@ -27,7 +27,6 @@ security:
     key-a: ${CACHE_KEY_A}
     key-c: ${CACHE_KEY_C}
     key-l: ${CACHE_KEY_L}
-    key-all: ${CACHE_KEY_ALL}
   authentication:
     username-a: ${USERNAME_A}
     password-a: ${PASSWORD_A}
