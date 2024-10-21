@@ -3,7 +3,7 @@ package br.com.inovatech.powerguard.infra.external.proxy;
 import br.com.inovatech.powerguard.dtos.EnergyDTO;
 import br.com.inovatech.powerguard.infra.exceptions.ExternalApiRequestException;
 import br.com.inovatech.powerguard.infra.external.dto.ApiResponseDTO;
-import br.com.inovatech.powerguard.infra.utils.PageCalculation;
+import br.com.inovatech.powerguard.infra.utils.PageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -43,11 +43,11 @@ public class EnergyRequestHandler {
         return makeRequest(endpoint, null)
                 .flatMapMany(response -> {
 
-                    if (response == null){
+                    if (response == null) {
                         return Flux.empty();
                     }
 
-                    var page = PageCalculation.getLastPage(response.getCount());
+                    var page = PageUtils.getLastPage(response.getCount());
 
                     return makeRequest(endpoint, page)
                             .flatMapMany(secondResponse -> Flux.fromIterable(secondResponse.getResults()));
@@ -60,10 +60,10 @@ public class EnergyRequestHandler {
      * a chamada e processar a resposta.
      *
      * @param endpoint O endpoint da API externa.
-     * @param page (Opcional) Número da página a ser requisitada, se a API suportar paginação.
+     * @param page     (Opcional) Número da página a ser requisitada, se a API suportar paginação.
      * @return Mono<ApiResponseDTO> Objeto Mono contendo a resposta da API externa.
      */
-    private Mono<ApiResponseDTO> makeRequest(String endpoint, Integer page){
+    private Mono<ApiResponseDTO> makeRequest(String endpoint, Integer page) {
         return webClient.get()
                 .uri(uriBuilder -> {
                     var uri = uriBuilder
@@ -72,7 +72,7 @@ public class EnergyRequestHandler {
                             .port(PORT)
                             .path(endpoint);
 
-                    if(page != null){
+                    if (page != null) {
                         uri.queryParam("page", page);
                     }
 
