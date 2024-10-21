@@ -6,11 +6,11 @@ import br.com.inovatech.powerguard.infra.configs.CacheEnvironmentConfig;
 import br.com.inovatech.powerguard.infra.exceptions.EnergyNotFoundException;
 import br.com.inovatech.powerguard.infra.external.proxy.EnergyMonitoringAPI;
 import br.com.inovatech.powerguard.infra.security.utils.AuthenticatedUserUtils;
-import br.com.inovatech.powerguard.infra.security.utils.PageUtils;
 import br.com.inovatech.powerguard.infra.utils.BuildingType;
+import br.com.inovatech.powerguard.infra.utils.Mapper;
+import br.com.inovatech.powerguard.infra.utils.PageUtils;
 import br.com.inovatech.powerguard.infra.utils.StringUtil;
 import br.com.inovatech.powerguard.repositories.EnergyRepository;
-import br.com.inovatech.powerguard.infra.utils.Mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -49,9 +49,10 @@ public class EnergyService {
     /**
      * Recupera todos os dados de energia das 24 horas de um prédio para o usuário autenticado.
      *
-     * @return Mono<ResponseEntity<List<EnergyDTO>>> contendo a lista de dados de energia
-     *         ou uma resposta sem conteúdo caso o cache esteja vazio.
+     * @return Mono<ResponseEntity < List < EnergyDTO>>> contendo a lista de dados de energia
+     * ou uma resposta sem conteúdo caso o cache esteja vazio.
      */
+    @SuppressWarnings("unchecked")
     public Mono<ResponseEntity<List<EnergyDTO>>> findEnergyDataLast24Hours() {
         log.info("Finding all energy data from the last 24 hours");
         return AuthenticatedUserUtils.getUser()
@@ -66,12 +67,12 @@ public class EnergyService {
     /**
      * Recupera todo o histórico de dados de energia para o usuário autenticado.
      *
-     * @param page     Número da página a ser recuperada.
-     * @param size     Tamanho da página.
+     * @param page      Número da página a ser recuperada.
+     * @param size      Tamanho da página.
      * @param direction Direção da ordenação (ASC ou DESC).
-     * @param orderBy  Campo pelo qual os dados devem ser ordenados.
-     * @return Mono<ResponseEntity<List<EnergyDTO>>> contendo a lista de dados de energia
-     *         ou uma resposta sem conteúdo caso não haja dados.
+     * @param orderBy   Campo pelo qual os dados devem ser ordenados.
+     * @return Mono<ResponseEntity < List < EnergyDTO>>> contendo a lista de dados de energia
+     * ou uma resposta sem conteúdo caso não haja dados.
      */
     public Mono<ResponseEntity<List<EnergyDTO>>> findAllEnergyDataHistory(int page, int size, String direction, String orderBy) {
         log.info("Finding all energy data history");
@@ -85,7 +86,7 @@ public class EnergyService {
      * Recupera os dados de energia por ID.
      *
      * @param id ID do dado de energia a ser recuperado.
-     * @return Mono<ResponseEntity<EnergyDTO>> contendo os dados de energia ou uma resposta sem conteúdo.
+     * @return Mono<ResponseEntity < EnergyDTO>> contendo os dados de energia ou uma resposta sem conteúdo.
      */
     public Mono<ResponseEntity<EnergyDTO>> findById(String id) {
         log.info("Finding energy data by id");
@@ -112,11 +113,11 @@ public class EnergyService {
                         var cacheKey = cacheKeys.getCaches();
                         String key = "";
 
-                        if(building.getBuildingName().equals(BuildingType.Building_A.name())){
+                        if (building.getBuildingName().equals(BuildingType.Building_A.name())) {
                             key = cacheKey[0];
-                        } else if (building.getBuildingName().equals(BuildingType.Building_C.name())){
+                        } else if (building.getBuildingName().equals(BuildingType.Building_C.name())) {
                             key = cacheKey[1];
-                        } else{
+                        } else {
                             key = cacheKey[2];
                         }
 
