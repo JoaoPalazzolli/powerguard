@@ -1,6 +1,7 @@
 package br.com.inovatech.powerguard.infra.security.utils;
 
 import br.com.inovatech.powerguard.dtos.TokenDTO;
+import br.com.inovatech.powerguard.infra.exceptions.InvalidJwtAuthenticationException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -40,6 +41,37 @@ public class JwtUtils {
      */
     public String extractUsername(String token){
         return extractClaim(Claims::getSubject, token);
+    }
+
+    /**
+     * Atualiza o token JWT de um usuário, verificando se o token atual ainda é válido.
+     *
+     * @param refreshToken O token de atualização atual.
+     * @param userDetails Detalhes do usuário para quem o novo token será gerado.
+     * @return Um novo TokenDTO com o accessToken e refreshToken atualizados.
+     */
+    public TokenDTO refreshToken(String refreshToken, UserDetails userDetails){
+        return refreshToken(new HashMap<>(), refreshToken, userDetails);
+    }
+
+    /**
+     * Atualiza o token JWT com claims adicionais, verificando a validade do token atual.
+     *
+     * @param extraClaims Claims adicionais a serem incluídos no novo token.
+     * @param refreshToken O token de atualização atual.
+     * @param userDetails Detalhes do usuário para quem o novo token será gerado.
+     * @return Um novo TokenDTO com o accessToken e refreshToken atualizados.
+     */
+    public TokenDTO refreshToken(Map<String, Object> extraClaims, String refreshToken, UserDetails userDetails){
+        if(refreshToken.contains("Bearer ")){
+            refreshToken = refreshToken.substring("Bearer ".length());
+        }
+
+        if(!isTokenValid(refreshToken, userDetails)){
+            throw new InvalidJwtAuthenticationException("Invalid Token!!!");
+        }
+
+        return createToken(extraClaims, userDetails);
     }
 
     /**
