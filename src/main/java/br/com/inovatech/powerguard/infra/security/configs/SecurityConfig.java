@@ -39,8 +39,8 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/api/v1/auth/**", "/webjars/**", "/v3/api-docs/**").permitAll()
-                        .pathMatchers("/api/v1/energy/**").authenticated()
+                        .pathMatchers("/api/v1/auth/signin", "/webjars/**", "/v3/api-docs/**").permitAll()
+                        .pathMatchers("/api/v1/energy/**", "/api/v1/auth/refresh").authenticated()
                         .pathMatchers("/users").denyAll()
                 )
                 .authenticationManager(reactiveAuthenticationManager) // Gerenciador de autenticação reativo
