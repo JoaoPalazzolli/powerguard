@@ -1,4 +1,4 @@
-FROM maven:3.9.1
+FROM maven:3.9.6
 
 WORKDIR /usr/src/powerguard
 
