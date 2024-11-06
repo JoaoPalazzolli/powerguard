@@ -7,6 +7,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+
 @Configuration
 public class WebFluxCorsConfig {
 
@@ -17,11 +19,8 @@ public class WebFluxCorsConfig {
     CorsWebFilter corsWebFilter(){
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOrigin(allowedOrigin);
-        config.addAllowedMethod("GET");
-        config.addAllowedMethod("POST");
-        config.addAllowedMethod("PUT");
-        config.addAllowedHeader("Content-Type");
-        config.addAllowedHeader("Authorization");
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "OPTIONS"));
+        config.addAllowedHeader("*");
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
