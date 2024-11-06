@@ -1,6 +1,9 @@
 package br.com.inovatech.powerguard.infra.security.filter;
 
+import br.com.inovatech.powerguard.infra.exceptions.InvalidJwtAuthenticationException;
 import br.com.inovatech.powerguard.infra.security.utils.JwtUtils;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,35 +44,43 @@ public class AuthenticationFilter implements WebFilter {
      */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String token = extractToken(exchange);
+        try {
+            String token = extractToken(exchange);
 
-        if (token == null) {
-            return chain.filter(exchange); // Continua se não houver token
+            if (token == null) {
+                return chain.filter(exchange); // Continua se não houver token
+            }
+
+            String username = jwtUtils.extractUsername(token);
+
+            if (username == null) {
+                return chain.filter(exchange); // Continua se não conseguir extrair o username
+            }
+
+            return userDetailsService.findByUsername(username)
+                    .flatMap(userDetails -> {
+
+                        if (jwtUtils.isTokenValid(token, userDetails)) {
+                            // Autentica o usuário se o token for válido
+                            UsernamePasswordAuthenticationToken authentication =
+                                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+                            SecurityContext securityContext = new SecurityContextImpl(authentication);
+
+                            return Mono.deferContextual(Mono::just)
+                                    .flatMap(context -> chain.filter(exchange)
+                                            .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext))));
+                        }
+
+                        return chain.filter(exchange);
+                    });
+        } catch (ExpiredJwtException e){
+            log.error("Expired JWT error: {}", e.getMessage());
+            throw new InvalidJwtAuthenticationException("Expired Token!!!");
+        } catch (MalformedJwtException e){
+            log.error("Malformed JWT error: {}", e.getMessage());
+            throw new InvalidJwtAuthenticationException("Malformed JWT!!!");
         }
-
-        String username = jwtUtils.extractUsername(token);
-
-        if (username == null) {
-            return chain.filter(exchange); // Continua se não conseguir extrair o username
-        }
-
-        return userDetailsService.findByUsername(username)
-                .flatMap(userDetails -> {
-                    if (jwtUtils.isTokenValid(token, userDetails)) {
-                        // Autentica o usuário se o token for válido
-                        UsernamePasswordAuthenticationToken authentication =
-                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                        SecurityContext securityContext = new SecurityContextImpl(authentication);
-
-                        return Mono.deferContextual(Mono::just)
-                                .flatMap(context -> chain.filter(exchange)
-                                        .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext))));
-                    }
-
-                    log.error("Authentication error: Invalid or expired JWT token.");
-                    return chain.filter(exchange); // Continua se o token não for válido
-                });
     }
 
     /**
