@@ -4,7 +4,9 @@ import br.com.inovatech.powerguard.infra.security.filter.AuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -39,12 +41,14 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
+                        .pathMatchers(HttpMethod.OPTIONS).permitAll()
                         .pathMatchers("/api/v1/auth/signin", "/webjars/**", "/v3/api-docs/**").permitAll()
                         .pathMatchers("/api/v1/energy/**", "/api/v1/auth/refresh").authenticated()
                         .pathMatchers("/users").denyAll()
                 )
                 .authenticationManager(reactiveAuthenticationManager) // Gerenciador de autenticação reativo
                 .addFilterAt(authFilter, SecurityWebFiltersOrder.AUTHENTICATION) // Adiciona o filtro de autenticação personalizado
+                .cors(Customizer.withDefaults())
                 .build();
     }
 }
