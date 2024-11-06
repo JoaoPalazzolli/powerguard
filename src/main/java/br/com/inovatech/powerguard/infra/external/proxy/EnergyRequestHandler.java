@@ -2,12 +2,14 @@ package br.com.inovatech.powerguard.infra.external.proxy;
 
 import br.com.inovatech.powerguard.dtos.EnergyDTO;
 import br.com.inovatech.powerguard.infra.exceptions.ExternalApiRequestException;
+import br.com.inovatech.powerguard.infra.exceptions.ExternalApiResponseException;
 import br.com.inovatech.powerguard.infra.external.dto.ApiResponseDTO;
 import br.com.inovatech.powerguard.infra.utils.PageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -64,22 +66,23 @@ public class EnergyRequestHandler {
      * @return Mono<ApiResponseDTO> Objeto Mono contendo a resposta da API externa.
      */
     private Mono<ApiResponseDTO> makeRequest(String endpoint, Integer page) {
-        return webClient.get()
-                .uri(uriBuilder -> {
-                    var uri = uriBuilder
-                            .scheme(SCHEMA)
-                            .host(HOST)
-                            .port(PORT)
-                            .path(endpoint);
+            return webClient.get()
+                    .uri(uriBuilder -> {
+                        var uri = uriBuilder
+                                .scheme(SCHEMA)
+                                .host(HOST)
+                                .port(PORT)
+                                .path(endpoint);
 
-                    if (page != null) {
-                        uri.queryParam("page", page);
-                    }
+                        if (page != null) {
+                            uri.queryParam("page", page);
+                        }
 
-                    return uri.build();
-                })
-                .retrieve()
-                .bodyToMono(ApiResponseDTO.class)
-                .onErrorMap(WebClientResponseException.class, e -> new ExternalApiRequestException("Failed to connect to the external API"));
+                        return uri.build();
+                    })
+                    .retrieve()
+                    .bodyToMono(ApiResponseDTO.class)
+                    .onErrorMap(WebClientRequestException.class, e -> new ExternalApiRequestException("Failed to connect to the external API"))
+                    .onErrorMap(WebClientResponseException.class, e -> new ExternalApiResponseException("Failed to get response to the external API"));
     }
 }
