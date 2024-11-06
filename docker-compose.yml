@@ -90,6 +90,7 @@ services:
       - PASSWORD_DB=${PASSWORD_DB}
       - HOST_CACHE=${HOST_CACHE}
       - PORT_CACHE=${PORT_CACHE}
+      - CORS_ORIGIN=${CORS_ORIGIN}
     ports:
       - 3000:${PORT_API}
     volumes:
