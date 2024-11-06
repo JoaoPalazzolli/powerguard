@@ -28,4 +28,14 @@ public class AuthController {
     public Mono<ResponseEntity<TokenDTO>> signin(@RequestBody SigninDTO signinDTO){
         return authService.signin(signinDTO);
     }
+
+    @Operation(summary = "Refresh a user and returns a new token", tags = { "Auth" }, responses = {
+            @ApiResponse(description = "Success", responseCode = "200", content = @Content(schema = @Schema(implementation = TokenDTO.class))),
+            @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
+            @ApiResponse(description = "Unauthorized", responseCode = "401", content = @Content),
+            @ApiResponse(description = "Internal Error", responseCode = "500", content = @Content)})
+    @PutMapping(value = "/refresh")
+    public Mono<ResponseEntity<TokenDTO>> refresh(@RequestHeader("Authorization") String refreshToken){
+        return authService.refresh(refreshToken);
+    }
 }
