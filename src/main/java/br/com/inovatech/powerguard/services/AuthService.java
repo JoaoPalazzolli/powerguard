@@ -6,11 +6,13 @@ import br.com.inovatech.powerguard.dtos.TokenDTO;
 import br.com.inovatech.powerguard.infra.configs.CacheEnvironmentConfig;
 import br.com.inovatech.powerguard.infra.security.configs.AuthenticationEnvironmentConfig;
 import br.com.inovatech.powerguard.infra.security.roles.UserRoles;
+import br.com.inovatech.powerguard.infra.security.utils.AuthenticatedUserUtils;
 import br.com.inovatech.powerguard.infra.security.utils.JwtUtils;
 import br.com.inovatech.powerguard.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -67,6 +69,21 @@ public class AuthService {
                     log.error("Authentication failed: {}", e.getMessage());
                     return Mono.error(new BadCredentialsException("Invalid username or password!"));
                 });
+    }
+
+    /**
+     * Atualiza o token JWT de um usuário autenticado, gerando um novo token de acesso
+     * a partir do refreshToken fornecido.
+     *
+     * @param refreshToken O token de atualização atual do usuário.
+     * @return Mono<ResponseEntity<TokenDTO>> que contém o novo token JWT de autenticação.
+     */
+    public Mono<ResponseEntity<TokenDTO>> refresh(String refreshToken) {
+        log.info("Refreshing Token");
+
+        return AuthenticatedUserUtils.getUser()
+                .map(user -> ResponseEntity.ok(jwtUtils.refreshToken(refreshToken, user)))
+                .doOnError(message -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message));
     }
 
     /**
