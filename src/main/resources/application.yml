@@ -21,6 +21,8 @@ spring:
       host: ${HOST_CACHE}
       port: ${PORT_CACHE}
 security:
+  cors:
+    origin: ${CORS_ORIGIN}
   key: ${SECURITY_KEY}
   token_expiration_time: ${TOKEN_EXPIRATION_TIME}
   cache-key:
